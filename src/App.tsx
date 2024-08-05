@@ -1,21 +1,23 @@
 import { SetStateAction, useReducer, useRef, useState } from 'react'
 import '../styles/App.css'
 import { QuestionData } from './questions'
-
-interface Guess {
-  GuessText: string
-  GuessName: string
-}
+import { Guess } from '../types/commontypes'
+import { ComputeWinner } from '../helper/ComputeWinner'
 
 export const App = () => {
   const [GuessList, dispatch]: [Guess[], React.Dispatch<action>] = useReducer(
     GuessReducer,
-    [{ GuessText: '', GuessName: '' }]
+    []
   )
   const [questionIndex, setQuestionIndex]: [
     number,
     React.Dispatch<SetStateAction<number>>
   ] = useState<number>(0)
+
+  const [winnerIndex, setWinnerIndex]: [
+    number,
+    React.Dispatch<SetStateAction<number>>
+  ] = useState<number>(-1)
   return (
     <div className='App'>
       <div>This is App</div>
@@ -28,18 +30,32 @@ export const App = () => {
         ) : (
           <>No More Questions</>
         )}
+        {GuessList?.map((G, index) => {
+          return index != winnerIndex ? (
+            <div>
+              {G.GuessName} has guess {G.GuessText}
+            </div>
+          ) : (
+            <div style={{ border: 'green', borderStyle: 'dotted' }} key={index}>
+              {/* <GuessBox AddGuess={AddGuess} /> */}
+              <div>
+                {G.GuessName} is winner with guess {G.GuessText}
+              </div>
+            </div>
+          )
+        })}
       </div>
-
-      {GuessList?.map(() => {
-        return <GuessBox AddGuess={AddGuess} />
-      })}
+      <GuessBox AddGuess={AddGuess} />
       <button
         onClick={() => {
           console.log(`submitting quetsion ${questionIndex}`)
+          if (winnerIndex == -1)
+            setWinnerIndex(ComputeWinner(questionIndex, GuessList))
         }}
       >
         Submit
       </button>
+
       <button
         onClick={() => {
           setQuestionIndex(questionIndex + 1)
@@ -90,7 +106,12 @@ const GuessBox = ({ AddGuess }: GuessBoxProps) => {
       {!nameRef.current?.value || !guessRef.current?.value ? (
         <button
           onClick={() => {
-            AddGuess({ GuessName: 'test', GuessText: 'adf' })
+            AddGuess({
+              GuessName: nameRef.current ? nameRef.current.value : '',
+              GuessText: guessRef.current ? Number(guessRef.current.value) : -1
+            })
+            if (nameRef.current) nameRef.current.value = ''
+            if (guessRef.current) guessRef.current.value = ''
           }}
         >
           Add

@@ -1,15 +1,15 @@
 interface Question {
   question: string
-  answer: string
+  answer: number
 }
 
 export const QuestionData: Array<Question> = [
   {
     question: 'How many planets are there in the solar system?',
-    answer: '9'
+    answer: 9
   },
   {
     question: 'How many Directions are there?',
-    answer: '4'
+    answer: 4
   }
 ]
